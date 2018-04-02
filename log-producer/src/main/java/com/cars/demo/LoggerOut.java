@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class LoggerOut {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(LoggerOut.class);
     @RequestMapping("/log")
     public String log(){
-        logger.info("sssss");
+        for (int i = 0; i < 1000; i++) {
+            logger.info("sssss");
+        }
         return "hello";
     }
 }

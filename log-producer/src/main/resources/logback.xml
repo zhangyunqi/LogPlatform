@@ -5,26 +5,48 @@
     <property name="LOG_HOME" value="/logs"></property>
     <property name="APP_NAME" value="CARS"></property>
     <property name="LOG_FILE" value="logs/CARS.log"></property>
+    <property name="ELK_ERROR_LOG_FILE" value="logs/ELK/CARS.log"></property>
 
+    <!--socket发送，网络错误后丢失信息
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>127.0.0.1:4560</destination>
         <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"appName":"${APP_NAME}"}</customFields>
         </encoder>
     </appender>
+    -->
+    <appender name="ELK_ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${ELK_ERROR_LOG_FILE}</file>
+        <!-- 滚动策略，按时间来分  -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 每日滚动 -->
+            <fileNamePattern>${APP_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- 存放30天的历史，限制在3GB的总大小  -->
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
 
+        </rollingPolicy>
+        <!-- 将日志以logback-json的格式保存 -->
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"appName":"${APP_NAME}"}</customFields>
+        </encoder>
+
+    </appender>
     <appender name="FILELOG" class="ch.qos.logback.core.FileAppender">
         <file>${LOG_FILE}</file>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-
-    <!-- Strictly speaking, the level attribute is not necessary since -->3
+    <!-- 通过logger可以精确定位。可以定位包路径，级别,运用哪个appender。 additivity="false"代表不重复打印日志-->
+    <logger name="com.cars.demo" additivity="false" level="INFO">
+        <appender-ref ref="ELK_ERROR_FILE" />
+    </logger>
+    <!-- Strictly speaking, the level attribute is not necessary since -->
     <!-- the level of the root level is set to DEBUG by default.       -->
     <root level="INFO">
         <!-- <appender-ref ref="LOGSTASH" /> -->
-         <appender-ref ref="FILELOG" />
+        <appender-ref ref="FILELOG" />
      </root>
 
  </configuration>
